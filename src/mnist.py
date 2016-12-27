@@ -5,16 +5,11 @@ import struct
 import gzip
 import urllib.request
 
-from collections import namedtuple
+from src.kmeans import generate_kmeans
+from src.const import *
 
 import numpy as np
 import matplotlib.pyplot as plt
-
-MNIST = namedtuple('MNIST', ['N', 'labels', 'images'])
-MNIST_URL = 'http://yann.lecun.com/exdb/mnist/'
-
-TRAIN = ('train-images-idx3-ubyte', 'train-labels-idx1-ubyte')
-TEST = ('t10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte')
 
 
 def maybe_download(url, *files, data_dir='./data'):
@@ -56,7 +51,7 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
 
     Returns
     -------
-    images : ndarray (N, rows, cols)
+    images : ndarray (N, rows * cols)
     labels : ndarray (N)
     """
 
@@ -86,9 +81,25 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
     with open(p_images, 'rb') as f_images:
         _, N, rows, cols = struct.unpack(">IIII", f_images.read(16))
         images = np.array(array.array("b", f_images.read()), dtype=dtype)
-        images = np.reshape(images, (N, rows, cols))
+        images = np.reshape(images, (N, rows * cols))
 
-    return MNIST(N, labels, images)
+    return MNIST(N, dataset, rows, cols, labels, images, None, None, None)
+
+
+# Loads mnist and adds Kmeans, PCA, binarisation
+def load_full_mnist(dataset):
+    try:
+        s = {'test': TEST, 'train': TRAIN}[dataset]
+    except KeyError:
+        raise ValueError('%s is not a valid dataset' % dataset)
+
+    maybe_download(MNIST_URL, *(f + '.gz' for f in s))
+
+    dataset = load_mnist(dataset)
+    dataset = generate_kmeans(dataset)
+
+    return dataset
+
 
 def display_samples(dataset):
     plt.figure(1)
@@ -96,14 +107,11 @@ def display_samples(dataset):
         k = random.sample(np.where(dataset.labels == i)[0].tolist(), 1)[0]
 
         plt.subplot(int('33%s' % (i + 1)))
-        plt.imshow(dataset.images[k], cmap='gray')
+        plt.imshow(np.reshape(dataset.images[k], (dataset.rows, dataset.cols)), cmap='gray')
         plt.grid(True)
 
     plt.show()
 
-maybe_download(MNIST_URL, *(f + '.gz' for f in TRAIN))
-maybe_download(MNIST_URL, *(f + '.gz' for f in TEST))
 
-train_dataset = load_mnist('train')
-test_dataset = load_mnist('test')
-display_samples(test_dataset)
+train_dataset = load_full_mnist('train')
+test_dataset = load_full_mnist('test')
