@@ -4,8 +4,6 @@ from sklearn.cluster import KMeans
 from sklearn.externals import joblib
 from src.const import MNIST
 
-import numpy as np
-
 
 def generate_kmeans(dataset, clusters=64, data_dir='./data'):
     p_dataset = os.path.join(data_dir, dataset.name + '-kmeans.pkl')

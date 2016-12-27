@@ -6,6 +6,7 @@ import gzip
 import urllib.request
 
 from src.kmeans import generate_kmeans
+from src.pca import generate_pca
 from src.const import *
 
 import numpy as np
@@ -83,7 +84,8 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
         images = np.array(array.array("b", f_images.read()), dtype=dtype)
         images = np.reshape(images, (N, rows * cols))
 
-    return MNIST(N, dataset, rows, cols, labels, images, None, None, None)
+    return MNIST(N, dataset, rows, cols, labels, images, None, None,
+                 np.where(images > 0.5, 1, 0))
 
 
 # Loads mnist and adds Kmeans, PCA, binarisation
@@ -97,12 +99,12 @@ def load_full_mnist(dataset):
 
     dataset = load_mnist(dataset)
     dataset = generate_kmeans(dataset)
+    dataset = generate_pca(dataset)
 
     return dataset
 
 
-def display_samples(dataset):
-    plt.figure(1)
+def display_mnist_samples(dataset):
     for i in range(9):
         k = random.sample(np.where(dataset.labels == i)[0].tolist(), 1)[0]
 
