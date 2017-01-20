@@ -10,16 +10,22 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def generate_pca(dataset, components=64, data_dir='./data'):
-    p_dataset = os.path.join(data_dir, dataset.name + '-pca.pkl')
+    d = dataset
+
+    pca_dir = os.path.join(data_dir, 'pca/')
+    p_dataset = os.path.join(pca_dir, d.name + '-%s.pkl' % components)
+
+    if not os.path.exists(pca_dir):
+        os.makedirs(pca_dir)
 
     if os.path.exists(p_dataset):
+        print('Loading PCA from file %s for dataset %s' % (p_dataset, d.name))
         pca = joblib.load(p_dataset)
     else:
         print('Launching PCA')
-        pca = PCA(components).fit(dataset.images)
+        pca = PCA(components).fit(d.images)
         joblib.dump(pca, p_dataset, compress=1)
 
-    d = dataset
     return MNIST(d.N, d.name, d.rows, d.cols, d.labels, d.images, d.kmeans, pca, d.binarized)
 
 

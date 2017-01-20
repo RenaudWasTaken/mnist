@@ -89,7 +89,7 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
 
 
 # Loads mnist and adds Kmeans, PCA, binarisation
-def load_full_mnist(dataset):
+def load_full_mnist(dataset, clusters, components):
     try:
         s = {'test': TEST, 'train': TRAIN}[dataset]
     except KeyError:
@@ -98,8 +98,8 @@ def load_full_mnist(dataset):
     maybe_download(MNIST_URL, *(f + '.gz' for f in s))
 
     dataset = load_mnist(dataset)
-    dataset = generate_kmeans(dataset)
-    dataset = generate_pca(dataset)
+    dataset = generate_kmeans(dataset, clusters)
+    dataset = generate_pca(dataset, components)
 
     return dataset
 
@@ -115,5 +115,8 @@ def display_mnist_samples(dataset):
     plt.show()
 
 
-train_dataset = load_full_mnist('train')
-test_dataset = load_full_mnist('test')
+def get_mnist_full(clusters=10, components=40):
+    train_dataset = load_full_mnist('train', clusters, components)
+    test_dataset = load_full_mnist('test', clusters, components)
+
+    return train_dataset, test_dataset
