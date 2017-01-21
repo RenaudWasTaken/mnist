@@ -58,6 +58,7 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
 
     files = {'test': TEST, 'train': TRAIN}
     dtype = {True: np.uint8, False: np.float64}[asbytes]
+    print('dtype:', dtype)
 
     # The files are assumed to have these names and should be found in 'path'
     if not os.path.exists(data_dir):
@@ -97,7 +98,7 @@ def load_full_mnist(dataset, clusters, components):
 
     maybe_download(MNIST_URL, *(f + '.gz' for f in s))
 
-    dataset = load_mnist(dataset)
+    dataset = load_mnist(dataset, asbytes=False)
     dataset = generate_kmeans(dataset, clusters)
     dataset = generate_pca(dataset, components)
 
@@ -115,8 +116,40 @@ def display_mnist_samples(dataset):
     plt.show()
 
 
+import pdb
+def mk_valid_set(tr, clusters, components):
+    N = 10000
+    labels_idx = np.zeros(N, dtype='int32')
+    vlabels = np.zeros(N)
+
+    for i in range(10):
+        idx = np.where(tr.labels == i)[0]
+        np.random.shuffle(idx)
+        idx = idx[:1000]
+
+        labels_idx[(i * 1000):((i + 1) * 1000)] = idx
+        vlabels[(i * 1000):((i + 1) * 1000)] = i
+
+    vimages = tr.images[labels_idx]
+
+    dataset = MNIST(N, 'validation', tr.rows, tr.cols, vlabels, vimages,
+                    None, None, np.where(vimages > 0.5, 1, 0))
+
+    dataset = generate_kmeans(dataset, clusters)
+    dataset = generate_pca(dataset, components)
+
+
+    tr = set_mnist(tr, 'N', tr.N - N)
+    tr = set_mnist(tr, 'labels', np.delete(tr.labels, labels_idx))
+    tr = set_mnist(tr, 'images', np.delete(tr.images, labels_idx, axis=0))
+
+    return dataset, tr
+
+
 def get_mnist_full(clusters=10, components=40):
     train_dataset = load_full_mnist('train', clusters, components)
     test_dataset = load_full_mnist('test', clusters, components)
 
-    return train_dataset, test_dataset
+    validation, train_dataset = mk_valid_set(train_dataset, clusters, components)
+
+    return train_dataset, test_dataset, validation

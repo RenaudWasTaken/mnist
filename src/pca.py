@@ -4,7 +4,7 @@ import random
 
 from sklearn.decomposition import PCA
 from sklearn.externals import joblib
-from src.const import MNIST
+from src.const import *
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -26,7 +26,7 @@ def generate_pca(dataset, components=64, data_dir='./data'):
         pca = PCA(components).fit(d.images)
         joblib.dump(pca, p_dataset, compress=1)
 
-    return MNIST(d.N, d.name, d.rows, d.cols, d.labels, d.images, d.kmeans, pca, d.binarized)
+    return set_mnist(d, 'PCA', pca)
 
 
 def display_pca_samples(dataset):

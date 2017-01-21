@@ -3,7 +3,7 @@ import os.path
 
 from sklearn.cluster import KMeans
 from sklearn.externals import joblib
-from src.const import MNIST
+from src.const import *
 
 
 def generate_kmeans(dataset, clusters=64, data_dir='./data'):
@@ -23,4 +23,4 @@ def generate_kmeans(dataset, clusters=64, data_dir='./data'):
         kmeans = KMeans(clusters, verbose=1).fit(d.images)
         joblib.dump(kmeans, p_dataset, compress=1)
 
-    return MNIST(d.N, d.name, d.rows, d.cols, d.labels, d.images, kmeans, d.PCA, d.binarized)
+    return set_mnist(d, 'kmeans', kmeans)
