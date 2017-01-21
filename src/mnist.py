@@ -115,8 +115,11 @@ def load_full_mnist(dataset, clusters, components):
     maybe_download(MNIST_URL, *(f + '.gz' for f in s))
 
     dataset = load_mnist(dataset, asbytes=False)
-    #dataset = generate_kmeans(dataset, clusters)
-    #dataset = generate_pca(dataset, components)
+    if clusters:
+        dataset = generate_kmeans(dataset, clusters)
+
+    if components:
+        dataset = generate_pca(dataset, components)
 
     return dataset
 
@@ -132,7 +135,6 @@ def display_mnist_samples(dataset):
     plt.show()
 
 
-import pdb
 def mk_valid_set(tr, clusters, components):
     N = 10000
     labels_idx = np.zeros(N, dtype='int32')
@@ -151,8 +153,11 @@ def mk_valid_set(tr, clusters, components):
     dataset = MNIST(N, 'validation', tr.rows, tr.cols, vlabels, vimages,
                     None, None, np.where(vimages > 0.5, 1, 0))
 
-    #dataset = generate_kmeans(dataset, clusters)
-    #dataset = generate_pca(dataset, components)
+    if clusters:
+        dataset = generate_kmeans(dataset, clusters)
+
+    if components:
+        dataset = generate_pca(dataset, components)
 
 
     tr = set_mnist(tr, 'N', tr.N - N)
@@ -162,10 +167,14 @@ def mk_valid_set(tr, clusters, components):
     return dataset, tr
 
 
-def get_mnist_full(clusters=10, components=40):
+def get_mnist_full(clusters=None, components=None, validation=True):
     train_dataset = load_full_mnist('train', clusters, components)
     test_dataset = load_full_mnist('test', clusters, components)
 
-    validation, train_dataset = mk_valid_set(train_dataset, clusters, components)
+    if validation:
+        validation, train_dataset = mk_valid_set(train_dataset, clusters, components)
 
-    return train_dataset, test_dataset, validation
+        return train_dataset, test_dataset, validation
+
+
+    return train_dataset, test_dataset
