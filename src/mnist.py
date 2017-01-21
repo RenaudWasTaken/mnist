@@ -82,11 +82,27 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
 
     with open(p_images, 'rb') as f_images:
         _, N, rows, cols = struct.unpack(">IIII", f_images.read(16))
-        images = np.array(array.array("b", f_images.read()), dtype=dtype)
+        images = np.zeros((N, rows*cols))
+
+        for i in range(0, N):
+            n_pixels = rows*cols
+            for j in range(0, n_pixels):
+                pixel = f_images.read(1)
+                value = pixel[0]
+                images[i, j] = value
+
+        return MNIST(N, dataset, rows, cols, labels, images, None, None,
+                     np.where(images > 0.5, 1, 0))
+
+    '''
+    with open(p_images, 'rb') as f_images:
+        _, N, rows, cols = struct.unpack(">IIII", f_images.read(16))
+        images = np.array(array.array("b", f_images.read()), dtype=np.dtype('b'))
         images = np.reshape(images, (N, rows * cols))
 
     return MNIST(N, dataset, rows, cols, labels, images, None, None,
                  np.where(images > 0.5, 1, 0))
+    '''
 
 
 # Loads mnist and adds Kmeans, PCA, binarisation
@@ -99,8 +115,8 @@ def load_full_mnist(dataset, clusters, components):
     maybe_download(MNIST_URL, *(f + '.gz' for f in s))
 
     dataset = load_mnist(dataset, asbytes=False)
-    dataset = generate_kmeans(dataset, clusters)
-    dataset = generate_pca(dataset, components)
+    #dataset = generate_kmeans(dataset, clusters)
+    #dataset = generate_pca(dataset, components)
 
     return dataset
 
@@ -135,8 +151,8 @@ def mk_valid_set(tr, clusters, components):
     dataset = MNIST(N, 'validation', tr.rows, tr.cols, vlabels, vimages,
                     None, None, np.where(vimages > 0.5, 1, 0))
 
-    dataset = generate_kmeans(dataset, clusters)
-    dataset = generate_pca(dataset, components)
+    #dataset = generate_kmeans(dataset, clusters)
+    #dataset = generate_pca(dataset, components)
 
 
     tr = set_mnist(tr, 'N', tr.N - N)
