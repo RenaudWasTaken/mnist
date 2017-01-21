@@ -91,8 +91,8 @@ def load_mnist(dataset='test', data_dir='./data', asbytes=True):
                 value = pixel[0]
                 images[i, j] = value
 
-        return MNIST(N, dataset, rows, cols, labels, images, None, None,
-                     np.where(images > 0.5, 1, 0))
+    return MNIST(N, dataset, rows, cols, labels, images, None, None,
+                 np.where(images > 0.5, 1, 0))
 
     '''
     with open(p_images, 'rb') as f_images:
