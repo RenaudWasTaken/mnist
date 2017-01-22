@@ -48,10 +48,11 @@ def get_mnist_full(clusters=None, components=None, validation=True):
     train_dataset = load_full_mnist('train', clusters, components)
     test_dataset = load_full_mnist('test', clusters, components)
 
+    '''
     if validation:
         validation, train_dataset = mk_valid_set(train_dataset, clusters, components)
 
         return train_dataset, test_dataset, validation
-
+    '''
 
     return train_dataset, test_dataset
