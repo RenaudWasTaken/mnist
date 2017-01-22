@@ -50,7 +50,7 @@ def get_mnist_full(clusters=None, components=None, validation=True):
 
     '''
     if validation:
-        validation, train_dataset = mk_valid_set(train_dataset, clusters, components)
+        validation = load_mnist('validation', clusters, components)
 
         return train_dataset, test_dataset, validation
     '''
